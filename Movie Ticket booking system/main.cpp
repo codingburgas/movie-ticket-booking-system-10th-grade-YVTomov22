@@ -3,6 +3,11 @@
 int main()
 {
 
-    displayMenu();
+    while (gameOn != false)
+    {
+
+        showMenu();
+
+    }
 
 }

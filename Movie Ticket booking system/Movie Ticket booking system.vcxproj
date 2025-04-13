@@ -129,9 +129,11 @@
   <ItemGroup>
     <ClCompile Include="displayFunctions.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="mainMenu.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="displayFunctions.h" />
+    <ClInclude Include="mainMenu.h" />
     <ClInclude Include="precompiler.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
