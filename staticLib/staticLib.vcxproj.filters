@@ -18,5 +18,8 @@
     <ClCompile Include="staticLib.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="itemsCinema.h">
+      <Filter>Header Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

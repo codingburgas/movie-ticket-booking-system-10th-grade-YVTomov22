@@ -4,4 +4,6 @@
 extern bool gameOn;
 
 void showMenu();
-void handleChoice(int choice);
+void listCinemasAndHalls();
+void listShowtimes();
+void searchMovies();
