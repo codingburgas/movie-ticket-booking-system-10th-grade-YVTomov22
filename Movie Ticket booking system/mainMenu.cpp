@@ -22,6 +22,7 @@ void showMenu() {
         break;
     case 0:
         gameOn = false;
+        system("cls");
         break;
     default:
         std::cout << "Invalid choice!\n";

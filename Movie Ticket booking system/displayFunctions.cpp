@@ -1,38 +1,5 @@
 #include "precompiler.h"
 
-void drawTopDesign()
-{
-std::cout << std::setw(80);
-	for (int i = 0; i < 50; i++)
-	{
-		std::cout << '_';
-	}
-	std::cout << '\n' << std::setw(80) << "/" << std::setw(49) << "\\" << '\n';
-}
-
-void drawBottomDesign()
-{
-
-	std::cout << std::setw(80) << "\\";
-	for (int i = 0; i < 48; i++)
-	{
-		std::cout << '_';
-	}
-	std::cout << "/\n";
-
-}
-
-
-void displayMenu()
-{
-	
-	drawTopDesign();
-
-
-
-	drawBottomDesign();
-}
-
 void listCinemasAndHalls() {
     for (const auto& cinema : cinemas) {
         std::cout << "City: " << cinema.city << "\n";
@@ -73,8 +40,7 @@ void searchMovies() {
             for (const auto& movie : hall.movies) {
                 if (movie.title == query || movie.language == query ||
                     movie.genre == query || movie.releaseDate == query) {
-                    std::cout << "Movie: " << movie.title << " | " << movie.language << " | "
-                        << movie.genre << " | " << movie.releaseDate << "\n";
+                    std::cout << "Movie: " << movie.title << " | " << movie.language << " | " << movie.genre << " | " << movie.releaseDate << "\n";
                 }
             }
         }

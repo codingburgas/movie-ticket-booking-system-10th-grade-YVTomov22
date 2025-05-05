@@ -1,3 +1,5 @@
+#pragma once
+
 #include <iostream>
 #include <vector>
 #include <string>
@@ -27,4 +29,3 @@ struct Cinema {
 };
 
 extern std::vector<Cinema> cinemas;
-extern bool gameOn;
