@@ -24,6 +24,7 @@ struct Hall {
 };
 
 struct Cinema {
+    std::string seat;
     std::string city;
     std::vector<Hall> halls;
 };

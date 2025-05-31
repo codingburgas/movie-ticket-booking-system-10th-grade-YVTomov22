@@ -6,6 +6,7 @@ void showMenu() {
     std::cout << "1. List All Cinemas and Halls\n";
     std::cout << "2. View All Showtimes of a Movie\n";
     std::cout << "3. Search Movie\n";
+    std::cout << "5. Add Movie\n";
     std::cout << "0. Exit\n";
     std::cout << "Choose an option: ";
     std::cin >> choice;
@@ -19,6 +20,14 @@ void showMenu() {
         break;
     case 3:
         searchMovies();
+        break;
+    case 4:
+        //seatSelector();
+    case 5:
+        addMovie();
+        break;
+    case 6:
+        addCinema();
         break;
     case 0:
         gameOn = false;

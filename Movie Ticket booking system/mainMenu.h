@@ -7,3 +7,4 @@ void showMenu();
 void listCinemasAndHalls();
 void listShowtimes();
 void searchMovies();
+void seatSelector();
