@@ -14,7 +14,7 @@ struct Movie {
     std::string title;
     std::string language;
     std::string genre;
-    std::string releaseDate;
+    int releaseDate;
     std::vector<Show> shows;
 };
 
@@ -24,7 +24,7 @@ struct Hall {
 };
 
 struct Cinema {
-    std::string seat;
+    int seat;
     std::string city;
     std::vector<Hall> halls;
 };

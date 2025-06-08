@@ -1,5 +1,6 @@
 #include "precompiler.h"
 
+// Adds a new cinema with halls
 void addCinema() {
     Cinema newCinema;
     std::cin.ignore(); // Clear newline buffer
@@ -7,11 +8,16 @@ void addCinema() {
     std::cout << "Enter city name: ";
     std::getline(std::cin, newCinema.city);
 
-    std::cout << "Enter seat info (e.g., 100 seats): ";
-    std::getline(std::cin, newCinema.seat);
+    std::cout << "Enter number of seats (e.g., 100): ";
+    std::cin >> newCinema.seat;
+
+    if (newCinema.seat <= 0 || newCinema.seat > 100) {
+        std::cout << "Invalid seat input.\n";
+        return;
+    }
 
     int hallCount;
-    std::cout << "How many halls in this cinema? ";
+    std::cout << "How many halls in the cinema? ";
     std::cin >> hallCount;
     std::cin.ignore();
 
@@ -26,8 +32,10 @@ void addCinema() {
     std::cout << "Cinema added successfully!\n";
 }
 
-
+// Adds a movie to a selected cinema and hall
 void addMovie() {
+    Show show;
+
     if (cinemas.empty()) {
         std::cout << "No cinemas available.\n";
         return;
@@ -41,7 +49,7 @@ void addMovie() {
 
     int cinemaIndex;
     std::cin >> cinemaIndex;
-    if (cinemaIndex < 1 || cinemaIndex > cinemas.size()) {
+    if (cinemaIndex < 1 || cinemaIndex > static_cast<int>(cinemas.size())) {
         std::cout << "Invalid cinema selection.\n";
         return;
     }
@@ -61,7 +69,7 @@ void addMovie() {
 
     int hallIndex;
     std::cin >> hallIndex;
-    if (hallIndex < 1 || hallIndex > selectedCinema.halls.size()) {
+    if (hallIndex < 1 || hallIndex > static_cast<int>(selectedCinema.halls.size())) {
         std::cout << "Invalid hall selection.\n";
         return;
     }
@@ -77,8 +85,13 @@ void addMovie() {
     std::getline(std::cin, newMovie.language);
     std::cout << "Enter genre: ";
     std::getline(std::cin, newMovie.genre);
-    std::cout << "Enter release date: ";
-    std::getline(std::cin, newMovie.releaseDate);
+    std::cout << "Enter release year (e.g., 2024): ";
+    std::cin >> newMovie.releaseDate;
+
+    if (newMovie.releaseDate < 1800 || newMovie.releaseDate > 2100) {
+        std::cout << "Invalid release year.\n";
+        return;
+    }
 
     // Add showtimes
     int showCount;
@@ -87,7 +100,6 @@ void addMovie() {
     std::cin.ignore();
 
     for (int i = 0; i < showCount; ++i) {
-        Show show;
         std::cout << "Enter time for show " << i + 1 << ": ";
         std::getline(std::cin, show.time);
         show.hallName = selectedHall.name;
@@ -99,7 +111,7 @@ void addMovie() {
     std::cout << "Movie added successfully!\n";
 }
 
-
+// Lists all cinemas and their halls
 void listCinemasAndHalls() {
     for (const auto& cinema : cinemas) {
         std::cout << "City: " << cinema.city << "\n";
@@ -109,9 +121,10 @@ void listCinemasAndHalls() {
     }
 }
 
+// Lists all showtimes for a given movie title
 void listShowtimes() {
     std::string movieTitle;
-    std::cin.ignore(); // clear buffer
+    std::cin.ignore(); // Clear buffer
     std::cout << "Enter movie title: ";
     std::getline(std::cin, movieTitle);
 
@@ -119,7 +132,8 @@ void listShowtimes() {
         for (const auto& hall : cinema.halls) {
             for (const auto& movie : hall.movies) {
                 if (movie.title == movieTitle) {
-                    std::cout << "In cinema: " << cinema.city << ", hall: " << hall.name << "\n";
+                    std::cout << "In cinema: " << cinema.city
+                        << ", hall: " << hall.name << "\n";
                     for (const auto& show : movie.shows) {
                         std::cout << "  Time: " << show.time << "\n";
                     }
@@ -129,18 +143,32 @@ void listShowtimes() {
     }
 }
 
+// Searches for movies by title, language, genre, or release year
 void searchMovies() {
     std::string query;
     std::cin.ignore();
-    std::cout << "Enter search keyword (title, language, genre, or date): ";
+    std::cout << "Enter search keyword (title, language, genre, or year): ";
     std::getline(std::cin, query);
+
+    int queryYear = -1;
+    try {
+        queryYear = std::stoi(query);
+    }
+    catch (...) {
+        // not a number; treat as string
+    }
 
     for (const auto& cinema : cinemas) {
         for (const auto& hall : cinema.halls) {
             for (const auto& movie : hall.movies) {
                 if (movie.title == query || movie.language == query ||
-                    movie.genre == query || movie.releaseDate == query) {
-                    std::cout << "Movie: " << movie.title << " | " << movie.language << " | " << movie.genre << " | " << movie.releaseDate << "\n";
+                    movie.genre == query || movie.releaseDate == queryYear) {
+                    std::cout << "Movie: " << movie.title
+                        << " | " << movie.language
+                        << " | " << movie.genre
+                        << " | " << movie.releaseDate
+                        << " | Cinema: " << cinema.city
+                        << " | Hall: " << hall.name << "\n";
                 }
             }
         }
