@@ -5,12 +5,14 @@
 #include <string>
 
 // Movie structure
-struct Show {
+class Show {
+public:
     std::string time;
     std::string hallName;
 };
 
-struct Movie {
+class Movie {
+public:
     std::string title;
     std::string language;
     std::string genre;
@@ -18,12 +20,14 @@ struct Movie {
     std::vector<Show> shows;
 };
 
-struct Hall {
+class Hall {
+public:
     std::string name;
     std::vector<Movie> movies;
 };
 
-struct Cinema {
+class Cinema {
+public:
     int seat;
     std::string city;
     std::vector<Hall> halls;

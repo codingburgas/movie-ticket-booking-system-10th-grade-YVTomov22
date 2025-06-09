@@ -1,11 +1,24 @@
 #include "precompiler.h"
 
-// Adds a new cinema with halls
+void userType(bool userChoice)
+{
+
+    if (userChoice)
+    {
+        std::cout << "Register user.";
+    }
+    else {
+        std::cout << "Login user.";
+    }
+
+}
+
 void addCinema() {
     Cinema newCinema;
-    std::cin.ignore(); // Clear newline buffer
+    std::cin.ignore();
 
     std::cout << "Enter city name: ";
+    std::ofstream cityName("cityname.txt");
     std::getline(std::cin, newCinema.city);
 
     std::cout << "Enter number of seats (e.g., 100): ";
@@ -113,9 +126,9 @@ void addMovie() {
 
 // Lists all cinemas and their halls
 void listCinemasAndHalls() {
-    for (const auto& cinema : cinemas) {
+    for (auto& cinema : cinemas) {
         std::cout << "City: " << cinema.city << "\n";
-        for (const auto& hall : cinema.halls) {
+        for (auto& hall : cinema.halls) {
             std::cout << "  Hall: " << hall.name << "\n";
         }
     }
@@ -124,17 +137,17 @@ void listCinemasAndHalls() {
 // Lists all showtimes for a given movie title
 void listShowtimes() {
     std::string movieTitle;
-    std::cin.ignore(); // Clear buffer
+    std::cin.ignore();
     std::cout << "Enter movie title: ";
     std::getline(std::cin, movieTitle);
 
-    for (const auto& cinema : cinemas) {
-        for (const auto& hall : cinema.halls) {
-            for (const auto& movie : hall.movies) {
+    for (auto& cinema : cinemas) {
+        for (auto& hall : cinema.halls) {
+            for (auto& movie : hall.movies) {
                 if (movie.title == movieTitle) {
                     std::cout << "In cinema: " << cinema.city
                         << ", hall: " << hall.name << "\n";
-                    for (const auto& show : movie.shows) {
+                    for (auto& show : movie.shows) {
                         std::cout << "  Time: " << show.time << "\n";
                     }
                 }
@@ -151,16 +164,11 @@ void searchMovies() {
     std::getline(std::cin, query);
 
     int queryYear = -1;
-    try {
-        queryYear = std::stoi(query);
-    }
-    catch (...) {
-        // not a number; treat as string
-    }
 
-    for (const auto& cinema : cinemas) {
-        for (const auto& hall : cinema.halls) {
-            for (const auto& movie : hall.movies) {
+
+    for (auto& cinema : cinemas) {
+        for (auto& hall : cinema.halls) {
+            for (auto& movie : hall.movies) {
                 if (movie.title == query || movie.language == query ||
                     movie.genre == query || movie.releaseDate == queryYear) {
                     std::cout << "Movie: " << movie.title
@@ -174,3 +182,4 @@ void searchMovies() {
         }
     }
 }
+

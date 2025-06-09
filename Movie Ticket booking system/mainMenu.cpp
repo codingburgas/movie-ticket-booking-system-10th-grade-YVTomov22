@@ -2,7 +2,7 @@
 
 void showMenu() {
     int choice;
-    std::cout << "\n--- Movie Ticket Booking System ---\n";
+    std::cout << "\n- Movie Ticket Booking System -\n";
     std::cout << "1. List All Cinemas and Halls\n";
     std::cout << "2. View All Showtimes of a Movie\n";
     std::cout << "3. Search Movie\n";
