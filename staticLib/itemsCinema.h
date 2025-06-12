@@ -4,6 +4,15 @@
 #include <vector>
 #include <string>
 
+struct User {
+    int id;
+    std::string username;
+    std::string password;
+};
+
+extern User currentUser;
+extern bool isLoggedIn;
+
 // Movie structure
 class Show {
 public:
