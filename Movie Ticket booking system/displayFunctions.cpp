@@ -15,17 +15,18 @@ void userType(bool userChoice)
 
 void addCinema() {
     Cinema newCinema;
-    std::cin.ignore();
+    std::cin.ignore(); // Clear input buffer
 
     std::cout << "Enter city name: ";
-    std::ofstream cityName("cityname.txt");
     std::getline(std::cin, newCinema.city);
 
-    std::cout << "Enter number of seats (e.g., 100): ";
+    std::cout << "Enter number of seats (1–100): ";
     std::cin >> newCinema.seat;
 
-    if (newCinema.seat <= 0 || newCinema.seat > 100) {
-        std::cout << "Invalid seat input.\n";
+    if (std::cin.fail() || newCinema.seat <= 0 || newCinema.seat > 100) {
+        std::cin.clear(); // Clear error state
+        std::cin.ignore(1000, '\n'); // Discard invalid input
+        std::cout << "Invalid seat input. Must be a number between 1 and 100.\n";
         return;
     }
 
@@ -41,20 +42,22 @@ void addCinema() {
         newCinema.halls.push_back(newHall);
     }
 
+    newCinema.addedByUserID = currentUser.id;
+
     cinemas.push_back(newCinema);
-    std::cout << "Cinema added successfully!\n";
+    std::cout << "Cinema added successfully by user ID " << currentUser.id << "!\n";
 }
+
+
 
 // Adds a movie to a selected cinema and hall
 void addMovie() {
-    Show show;
-
     if (cinemas.empty()) {
         std::cout << "No cinemas available.\n";
         return;
     }
 
-    // List cinemas
+    // Select Cinema
     std::cout << "\nSelect a Cinema:\n";
     for (size_t i = 0; i < cinemas.size(); ++i) {
         std::cout << i + 1 << ". " << cinemas[i].city << "\n";
@@ -62,7 +65,7 @@ void addMovie() {
 
     int cinemaIndex;
     std::cin >> cinemaIndex;
-    if (cinemaIndex < 1 || cinemaIndex > static_cast<int>(cinemas.size())) {
+    if (cinemaIndex < 1 || cinemaIndex > cinemas.size()) {
         std::cout << "Invalid cinema selection.\n";
         return;
     }
@@ -74,7 +77,7 @@ void addMovie() {
         return;
     }
 
-    // List halls
+    // Select Hall
     std::cout << "\nSelect a Hall:\n";
     for (size_t i = 0; i < selectedCinema.halls.size(); ++i) {
         std::cout << i + 1 << ". " << selectedCinema.halls[i].name << "\n";
@@ -82,57 +85,67 @@ void addMovie() {
 
     int hallIndex;
     std::cin >> hallIndex;
-    if (hallIndex < 1 || hallIndex > static_cast<int>(selectedCinema.halls.size())) {
+    if (hallIndex < 1 || hallIndex > selectedCinema.halls.size()) {
         std::cout << "Invalid hall selection.\n";
         return;
     }
 
     Hall& selectedHall = selectedCinema.halls[hallIndex - 1];
 
-    // Get movie details
+    // Get Movie Details
     Movie newMovie;
-    std::cin.ignore(); // Clear newline
+    std::cin.ignore(); // Clear buffer
     std::cout << "Enter movie title: ";
     std::getline(std::cin, newMovie.title);
     std::cout << "Enter language: ";
     std::getline(std::cin, newMovie.language);
     std::cout << "Enter genre: ";
     std::getline(std::cin, newMovie.genre);
-    std::cout << "Enter release year (e.g., 2024): ";
+    std::cout << "Enter release date: ";
     std::cin >> newMovie.releaseDate;
 
-    if (newMovie.releaseDate < 1800 || newMovie.releaseDate > 2100) {
-        std::cout << "Invalid release year.\n";
-        return;
-    }
-
-    // Add showtimes
+    // Add Shows
     int showCount;
-    std::cout << "How many showtimes to add? ";
+    std::cout << "How many showtimes? ";
     std::cin >> showCount;
     std::cin.ignore();
 
     for (int i = 0; i < showCount; ++i) {
+        Show show;
         std::cout << "Enter time for show " << i + 1 << ": ";
         std::getline(std::cin, show.time);
         show.hallName = selectedHall.name;
         newMovie.shows.push_back(show);
     }
 
-    // Add movie to hall
+    // Track who added it
+    newMovie.addedByUserID = currentUser.id;
+
+    // Save to Hall
     selectedHall.movies.push_back(newMovie);
-    std::cout << "Movie added successfully!\n";
+    std::cout << "Movie added successfully by user ID " << currentUser.id << "!\n";
 }
+
 
 // Lists all cinemas and their halls
 void listCinemasAndHalls() {
+    bool found = false;
+
     for (auto& cinema : cinemas) {
-        std::cout << "City: " << cinema.city << "\n";
-        for (auto& hall : cinema.halls) {
-            std::cout << "  Hall: " << hall.name << "\n";
+        if (cinema.addedByUserID == currentUser.id) {
+            found = true;
+            std::cout << "City: " << cinema.city << "\n";
+            for (auto& hall : cinema.halls) {
+                std::cout << "  Hall: " << hall.name << "\n";
+            }
         }
     }
+
+    if (!found) {
+        std::cout << "You haven't added any cinemas yet.\n";
+    }
 }
+
 
 // Lists all showtimes for a given movie title
 void listShowtimes() {

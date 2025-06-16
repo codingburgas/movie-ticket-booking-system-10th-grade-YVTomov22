@@ -20,14 +20,15 @@ public:
     std::string hallName;
 };
 
-class Movie {
-public:
+struct Movie {
     std::string title;
     std::string language;
     std::string genre;
     int releaseDate;
     std::vector<Show> shows;
+    int addedByUserID; // New field
 };
+
 
 class Hall {
 public:
@@ -40,6 +41,7 @@ public:
     int seat;
     std::string city;
     std::vector<Hall> halls;
+    int addedByUserID;
 };
 
 extern std::vector<Cinema> cinemas;
