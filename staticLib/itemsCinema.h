@@ -8,7 +8,9 @@ struct User {
     int id;
     std::string username;
     std::string password;
+    std::string role; // "admin" or "user"
 };
+
 
 extern User currentUser;
 extern bool isLoggedIn;

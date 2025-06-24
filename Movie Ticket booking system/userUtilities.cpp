@@ -16,66 +16,94 @@ int getNextUserID() {
 }
 
 void registerUser() {
-    std::string username, password;
-
+    User newUser;
     std::cin.ignore();
-    std::cout << "Enter a username: ";
-    std::getline(std::cin, username);
-    std::cout << "Enter a password: ";
-    std::getline(std::cin, password);
 
-    int newID = getNextUserID();
+    std::cout << "Enter username: ";
+    std::getline(std::cin, newUser.username);
+    std::cout << "Enter password: ";
+    std::getline(std::cin, newUser.password);
 
-    std::ofstream outfile("users.txt", std::ios::app);
-    outfile << newID << " " << username << " " << password << "\n";
+    // Ask for role
+    std::cout << "Register as (admin/user): ";
+    std::getline(std::cin, newUser.role);
 
-    std::cout << "Registration successful! Your user ID is: " << newID << "\n";
+    while (newUser.role != "admin" && newUser.role != "user") {
+        std::cout << "Invalid role. Enter 'admin' or 'user': ";
+        std::getline(std::cin, newUser.role);
+    }
+
+    newUser.id = getNextUserID();
+
+    std::ofstream outFile("users.txt", std::ios::app);
+    outFile << newUser.id << "," << newUser.username << "," << newUser.password << "," << newUser.role << "\n";
+    outFile.close();
+
+    std::cout << "Registration successful. Your ID is " << newUser.id << "\n";
 }
+
 
 void loginUser() {
     std::string username, password;
+    bool success = false;
+
     std::cin.ignore();
-    std::cout << "Username: ";
+    std::cout << "Enter username: ";
     std::getline(std::cin, username);
-    std::cout << "Password: ";
+    std::cout << "Enter password: ";
     std::getline(std::cin, password);
 
-    std::ifstream infile("users.txt");
+    std::ifstream inFile("users.txt");
     std::string line;
-    while (std::getline(infile, line)) {
+
+    while (std::getline(inFile, line)) {
         std::istringstream iss(line);
-        int id;
-        std::string u, p;
-        if (iss >> id >> u >> p) {
-            if (u == username && p == password) {
-                isLoggedIn = true;
-                currentUser.id = id;
-                currentUser.username = u;
-                currentUser.password = p;
-                std::cout << "Login successful! Welcome, " << currentUser.username << " (ID: " << currentUser.id << ").\n";
-                return;
-            }
+        std::string idStr, uname, pass, role;
+        std::getline(iss, idStr, ',');
+        std::getline(iss, uname, ',');
+        std::getline(iss, pass, ',');
+        std::getline(iss, role);
+
+        if (uname == username && pass == password) {
+            currentUser.id = std::stoi(idStr);
+            currentUser.username = uname;
+            currentUser.password = pass;
+            currentUser.role = role;
+
+            std::cout << "Login successful as " << role << "!\n";
+            success = true;
+            break;
         }
     }
 
-    std::cout << "Login failed! Invalid username or password.\n";
+    if (!success) {
+        std::cout << "Invalid username or password.\n";
+    }
 }
 
+
+
 void showAuthMenu() {
-    int choice;
     while (!isLoggedIn) {
-        std::cout << "\n--- User Authentication ---\n";
+        int choice;
+        std::cout << "\n--- Welcome ---\n";
         std::cout << "1. Register\n";
         std::cout << "2. Login\n";
         std::cout << "0. Exit\n";
-        std::cout << "Choice: ";
+        std::cout << "Choose an option: ";
         std::cin >> choice;
 
         switch (choice) {
-        case 1: registerUser(); break;
-        case 2: loginUser(); break;
-        case 0: exit(0);
-        default: std::cout << "Invalid choice!\n"; break;
+        case 1:
+            registerUser();
+            break;
+        case 2:
+            loginUser();
+            break;
+        case 0:
+            gameOn = false;
+        default:
+            std::cout << "Invalid choice.\n";
         }
     }
 }
