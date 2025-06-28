@@ -4,3 +4,6 @@
 4 yu 1
 5 sigma 123
 6,sigma,23,admin
+6,sigma,23,user
+6,s,2,admin
+6,e,3,user

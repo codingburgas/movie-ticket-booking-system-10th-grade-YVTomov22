@@ -14,8 +14,14 @@ void userType(bool userChoice)
 }
 
 void addCinema() {
+    // Restrict to admin
+    if (currentUser.role != "admin") {
+        std::cout << "Access denied: Only admins can add cinemas.\n";
+        return;
+    }
+
     Cinema newCinema;
-    std::cin.ignore(); // Clear input buffer
+    std::cin.ignore();
 
     std::cout << "Enter city name: ";
     std::getline(std::cin, newCinema.city);
@@ -24,9 +30,9 @@ void addCinema() {
     std::cin >> newCinema.seat;
 
     if (std::cin.fail() || newCinema.seat <= 0 || newCinema.seat > 100) {
-        std::cin.clear(); // Clear error state
-        std::cin.ignore(1000, '\n'); // Discard invalid input
-        std::cout << "Invalid seat input. Must be a number between 1 and 100.\n";
+        std::cin.clear();
+        std::cin.ignore(1000, '\n');
+        std::cout << "Invalid seat input.\n";
         return;
     }
 
@@ -43,9 +49,18 @@ void addCinema() {
     }
 
     newCinema.addedByUserID = currentUser.id;
-
     cinemas.push_back(newCinema);
-    std::cout << "Cinema added successfully by user ID " << currentUser.id << "!\n";
+
+    // Save to file
+    std::ofstream outFile("cinemas.txt", std::ios::app);
+    outFile << currentUser.id << "," << newCinema.city << "," << newCinema.seat;
+
+    for (const auto& hall : newCinema.halls) {
+        outFile << "," << hall.name;
+    }
+    outFile << "\n";
+
+    std::cout << "Cinema added successfully by admin user ID " << currentUser.id << "!\n";
 }
 
 
@@ -130,21 +145,32 @@ void addMovie() {
 // Lists all cinemas and their halls
 void listCinemasAndHalls() {
     bool found = false;
+    int index = 1;
 
-    for (auto& cinema : cinemas) {
+    for (const auto& cinema : cinemas) {
         if (cinema.addedByUserID == currentUser.id) {
             found = true;
-            std::cout << "City: " << cinema.city << "\n";
-            for (auto& hall : cinema.halls) {
-                std::cout << "  Hall: " << hall.name << "\n";
+            std::cout << "\nCinema " << index++ << ":\n";
+            std::cout << "  City: " << cinema.city << "\n";
+            std::cout << "  Seats: " << cinema.seat << "\n";
+
+            if (!cinema.halls.empty()) {
+                std::cout << "  Halls:\n";
+                for (const auto& hall : cinema.halls) {
+                    std::cout << "    - " << hall.name << "\n";
+                }
+            }
+            else {
+                std::cout << "  No halls added to this cinema.\n";
             }
         }
     }
 
     if (!found) {
-        std::cout << "You haven't added any cinemas yet.\n";
+        std::cout << "\nYou haven't added any cinemas yet.\n";
     }
 }
+
 
 
 // Lists all showtimes for a given movie title

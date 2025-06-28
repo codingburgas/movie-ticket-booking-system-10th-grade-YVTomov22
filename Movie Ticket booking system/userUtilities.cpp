@@ -45,8 +45,6 @@ void registerUser() {
 
 void loginUser() {
     std::string username, password;
-    bool success = false;
-
     std::cin.ignore();
     std::cout << "Enter username: ";
     std::getline(std::cin, username);
@@ -55,6 +53,7 @@ void loginUser() {
 
     std::ifstream inFile("users.txt");
     std::string line;
+    bool found = false;
 
     while (std::getline(inFile, line)) {
         std::istringstream iss(line);
@@ -70,16 +69,18 @@ void loginUser() {
             currentUser.password = pass;
             currentUser.role = role;
 
+            isLoggedIn = true;
             std::cout << "Login successful as " << role << "!\n";
-            success = true;
+            found = true;
             break;
         }
     }
 
-    if (!success) {
+    if (!found) {
         std::cout << "Invalid username or password.\n";
     }
 }
+
 
 
 
