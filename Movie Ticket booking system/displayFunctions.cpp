@@ -1,25 +1,7 @@
 #include "precompiler.h"
 
-void userType(bool userChoice)
-{
-
-    if (userChoice)
-    {
-        std::cout << "Register user.";
-    }
-    else {
-        std::cout << "Login user.";
-    }
-
-}
 
 void addCinema() {
-    // Restrict to admin
-    if (currentUser.role != "admin") {
-        std::cout << "Access denied: Only admins can add cinemas.\n";
-        return;
-    }
-
     Cinema newCinema;
     std::cin.ignore();
 
@@ -49,19 +31,22 @@ void addCinema() {
     }
 
     newCinema.addedByUserID = currentUser.id;
+
+    // Save to file immediately
+    std::ofstream file("cinemas.txt", std::ios::app);
+    file << newCinema.city << "," << newCinema.seat << "," << currentUser.id;
+    for (const auto& hall : newCinema.halls) {
+        file << "," << hall.name;
+    }
+    file << "\n";
+    file.close();
+
+    // Add to current session memory
     cinemas.push_back(newCinema);
 
-    // Save to file
-    std::ofstream outFile("cinemas.txt", std::ios::app);
-    outFile << currentUser.id << "," << newCinema.city << "," << newCinema.seat;
-
-    for (const auto& hall : newCinema.halls) {
-        outFile << "," << hall.name;
-    }
-    outFile << "\n";
-
-    std::cout << "Cinema added successfully by admin user ID " << currentUser.id << "!\n";
+    std::cout << "Cinema added and saved successfully!\n";
 }
+
 
 
 
@@ -72,7 +57,6 @@ void addMovie() {
         return;
     }
 
-    // Select Cinema
     std::cout << "\nSelect a Cinema:\n";
     for (size_t i = 0; i < cinemas.size(); ++i) {
         std::cout << i + 1 << ". " << cinemas[i].city << "\n";
@@ -92,7 +76,6 @@ void addMovie() {
         return;
     }
 
-    // Select Hall
     std::cout << "\nSelect a Hall:\n";
     for (size_t i = 0; i < selectedCinema.halls.size(); ++i) {
         std::cout << i + 1 << ". " << selectedCinema.halls[i].name << "\n";
@@ -107,9 +90,8 @@ void addMovie() {
 
     Hall& selectedHall = selectedCinema.halls[hallIndex - 1];
 
-    // Get Movie Details
     Movie newMovie;
-    std::cin.ignore(); // Clear buffer
+    std::cin.ignore();
     std::cout << "Enter movie title: ";
     std::getline(std::cin, newMovie.title);
     std::cout << "Enter language: ";
@@ -117,9 +99,8 @@ void addMovie() {
     std::cout << "Enter genre: ";
     std::getline(std::cin, newMovie.genre);
     std::cout << "Enter release date: ";
-    std::cin >> newMovie.releaseDate;
+    std::getline(std::cin, newMovie.releaseDate);
 
-    // Add Shows
     int showCount;
     std::cout << "How many showtimes? ";
     std::cin >> showCount;
@@ -133,36 +114,77 @@ void addMovie() {
         newMovie.shows.push_back(show);
     }
 
-    // Track who added it
     newMovie.addedByUserID = currentUser.id;
-
-    // Save to Hall
     selectedHall.movies.push_back(newMovie);
+
+    std::ofstream file("movies.txt", std::ios::app);
+    if (file.is_open()) {
+        file << currentUser.id << ','
+            << selectedCinema.city << ','
+            << selectedHall.name << ','
+            << newMovie.title << ','
+            << newMovie.language << ','
+            << newMovie.genre << ','
+            << newMovie.releaseDate;
+
+        for (const auto& show : newMovie.shows) {
+            file << ',' << show.time;
+        }
+
+        file << '\n';
+        file.close();
+    }
+
     std::cout << "Movie added successfully by user ID " << currentUser.id << "!\n";
 }
 
 
+
 // Lists all cinemas and their halls
 void listCinemasAndHalls() {
+    std::ifstream inFile("cinemas.txt");
+    std::string line;
     bool found = false;
     int index = 1;
 
-    for (const auto& cinema : cinemas) {
-        if (cinema.addedByUserID == currentUser.id) {
-            found = true;
-            std::cout << "\nCinema " << index++ << ":\n";
-            std::cout << "  City: " << cinema.city << "\n";
-            std::cout << "  Seats: " << cinema.seat << "\n";
+    while (std::getline(inFile, line)) {
+        std::istringstream iss(line);
+        std::string token;
 
-            if (!cinema.halls.empty()) {
-                std::cout << "  Halls:\n";
-                for (const auto& hall : cinema.halls) {
-                    std::cout << "    - " << hall.name << "\n";
-                }
+        Cinema cinema;
+        std::getline(iss, token, ',');
+        int fileUserId = std::stoi(token);
+
+        if (fileUserId != currentUser.id)
+            continue;
+
+        cinema.addedByUserID = fileUserId;
+
+        std::getline(iss, cinema.city, ',');
+        std::getline(iss, token, ',');
+        cinema.seat = std::stoi(token);
+
+        std::vector<Hall> halls;
+        while (std::getline(iss, token, ',')) {
+            Hall hall;
+            hall.name = token;
+            halls.push_back(hall);
+        }
+
+        // Display the cinema
+        found = true;
+        std::cout << "\nCinema " << index++ << ":\n";
+        std::cout << "  City: " << cinema.city << "\n";
+        std::cout << "  Seats: " << cinema.seat << "\n";
+
+        if (!halls.empty()) {
+            std::cout << "  Halls:\n";
+            for (const auto& hall : halls) {
+                std::cout << "    - " << hall.name << "\n";
             }
-            else {
-                std::cout << "  No halls added to this cinema.\n";
-            }
+        }
+        else {
+            std::cout << "  No halls added to this cinema.\n";
         }
     }
 
@@ -170,6 +192,7 @@ void listCinemasAndHalls() {
         std::cout << "\nYou haven't added any cinemas yet.\n";
     }
 }
+
 
 
 
@@ -209,7 +232,7 @@ void searchMovies() {
         for (auto& hall : cinema.halls) {
             for (auto& movie : hall.movies) {
                 if (movie.title == query || movie.language == query ||
-                    movie.genre == query || movie.releaseDate == queryYear) {
+                    movie.genre == query) {
                     std::cout << "Movie: " << movie.title
                         << " | " << movie.language
                         << " | " << movie.genre
@@ -222,3 +245,47 @@ void searchMovies() {
     }
 }
 
+
+
+void loadMoviesFromFile() {
+    std::ifstream file("movies.txt");
+    std::string line;
+
+    while (std::getline(file, line)) {
+        std::istringstream iss(line);
+        std::string userIdStr, city, hallName, title, language, genre, releaseDate, showTime;
+
+        std::getline(iss, userIdStr, ',');
+        std::getline(iss, city, ',');
+        std::getline(iss, hallName, ',');
+        std::getline(iss, title, ',');
+        std::getline(iss, language, ',');
+        std::getline(iss, genre, ',');
+        std::getline(iss, releaseDate, ',');
+
+        Movie movie;
+        movie.addedByUserID = std::stoi(userIdStr);
+        movie.title = title;
+        movie.language = language;
+        movie.genre = genre;
+        movie.releaseDate = releaseDate;
+
+        while (std::getline(iss, showTime, ',')) {
+            Show show;
+            show.time = showTime;
+            show.hallName = hallName;
+            movie.shows.push_back(show);
+        }
+
+        // Locate matching cinema and hall
+        for (auto& cinema : cinemas) {
+            if (cinema.city == city) {
+                for (auto& hall : cinema.halls) {
+                    if (hall.name == hallName) {
+                        hall.movies.push_back(movie);
+                    }
+                }
+            }
+        }
+    }
+}

@@ -6,6 +6,8 @@ bool isLoggedIn = false;
 bool gameOn = true;
 
 int main() {
+    
+    loadMoviesFromFile();
 
     while (!isLoggedIn) {
         showAuthMenu();

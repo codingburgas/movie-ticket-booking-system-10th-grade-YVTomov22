@@ -1,9 +1,2 @@
-1 Yan Tomov 123
-2 Sigma 2
-3 Yuan 12
-4 yu 1
-5 sigma 123
-6,sigma,23,admin
-6,sigma,23,user
-6,s,2,admin
-6,e,3,user
+1,s,2,admin
+1,e,1,user

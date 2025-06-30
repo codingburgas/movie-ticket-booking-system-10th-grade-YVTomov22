@@ -26,7 +26,7 @@ struct Movie {
     std::string title;
     std::string language;
     std::string genre;
-    int releaseDate;
+    std::string releaseDate;
     std::vector<Show> shows;
     int addedByUserID; // New field
 };
