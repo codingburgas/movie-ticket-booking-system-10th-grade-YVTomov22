@@ -6,4 +6,5 @@ void searchMovies();
 void addMovie();
 void addCinema();
 void loadMoviesFromFile();
-void loadCinemas();
+void loadCinemasFromFile();
+void saveCinemasToFile();

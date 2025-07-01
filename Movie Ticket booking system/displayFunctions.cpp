@@ -1,25 +1,29 @@
 #include "precompiler.h"
 
+bool isNumber(const std::string& s) {
+    if (s.empty()) return false;
+    return std::all_of(s.begin(), s.end(), ::isdigit);
+}
+
+
 
 void addCinema() {
     Cinema newCinema;
-    std::cin.ignore();
+    std::cin.ignore(); // clear buffer
 
     std::cout << "Enter city name: ";
     std::getline(std::cin, newCinema.city);
 
     std::cout << "Enter number of seats (1–100): ";
     std::cin >> newCinema.seat;
-
     if (std::cin.fail() || newCinema.seat <= 0 || newCinema.seat > 100) {
-        std::cin.clear();
-        std::cin.ignore(1000, '\n');
+        std::cin.clear(); std::cin.ignore(1000, '\n');
         std::cout << "Invalid seat input.\n";
         return;
     }
 
     int hallCount;
-    std::cout << "How many halls in the cinema? ";
+    std::cout << "How many halls? ";
     std::cin >> hallCount;
     std::cin.ignore();
 
@@ -31,22 +35,12 @@ void addCinema() {
     }
 
     newCinema.addedByUserID = currentUser.id;
-
-    // Save to file immediately
-    std::ofstream file("cinemas.txt", std::ios::app);
-    file << newCinema.city << "," << newCinema.seat << "," << currentUser.id;
-    for (const auto& hall : newCinema.halls) {
-        file << "," << hall.name;
-    }
-    file << "\n";
-    file.close();
-
-    // Add to current session memory
     cinemas.push_back(newCinema);
 
-    std::cout << "Cinema added and saved successfully!\n";
-}
+    saveCinemasToFile(); // Save after adding
 
+    std::cout << "Cinema added successfully!\n";
+}
 
 
 
@@ -141,56 +135,54 @@ void addMovie() {
 
 
 // Lists all cinemas and their halls
+// Lists all cinemas and their halls
 void listCinemasAndHalls() {
     std::ifstream inFile("cinemas.txt");
+    if (!inFile.is_open()) {
+        std::cout << "\nYou haven't added any cinemas yet.\n";
+        return;
+    }
+
     std::string line;
     bool found = false;
     int index = 1;
 
     while (std::getline(inFile, line)) {
-        std::istringstream iss(line);
-        std::string token;
+        if (line.empty()) continue;
+        found = true;
 
         Cinema cinema;
-        std::getline(iss, token, ',');
-        int fileUserId = std::stoi(token);
+        cinema.city = line;
 
-        if (fileUserId != currentUser.id)
-            continue;
+        std::getline(inFile, line);
+        cinema.seat = std::stoi(line);
 
-        cinema.addedByUserID = fileUserId;
+        std::getline(inFile, line);
+        int hallCount = std::stoi(line);
 
-        std::getline(iss, cinema.city, ',');
-        std::getline(iss, token, ',');
-        cinema.seat = std::stoi(token);
-
-        std::vector<Hall> halls;
-        while (std::getline(iss, token, ',')) {
-            Hall hall;
-            hall.name = token;
-            halls.push_back(hall);
-        }
-
-        // Display the cinema
-        found = true;
         std::cout << "\nCinema " << index++ << ":\n";
         std::cout << "  City: " << cinema.city << "\n";
         std::cout << "  Seats: " << cinema.seat << "\n";
 
-        if (!halls.empty()) {
+        if (hallCount > 0) {
             std::cout << "  Halls:\n";
-            for (const auto& hall : halls) {
-                std::cout << "    - " << hall.name << "\n";
+            for (int i = 0; i < hallCount; ++i) {
+                std::getline(inFile, line);
+                std::cout << "    - " << line << "\n";
             }
         }
         else {
             std::cout << "  No halls added to this cinema.\n";
         }
+
+        // Read the user ID line to advance the file pointer
+        std::getline(inFile, line);
     }
 
     if (!found) {
         std::cout << "\nYou haven't added any cinemas yet.\n";
     }
+    inFile.close();
 }
 
 
@@ -243,6 +235,55 @@ void searchMovies() {
             }
         }
     }
+}
+
+void saveCinemasToFile() {
+    std::ofstream out("cinemas.txt");
+    for (const auto& cinema : cinemas) {
+        out << cinema.city << "\n";
+        out << cinema.seat << "\n";
+        out << cinema.halls.size() << "\n";
+        for (const auto& hall : cinema.halls) {
+            out << hall.name << "\n";
+        }
+        out << cinema.addedByUserID << "\n";
+    }
+    out.close();
+}
+
+void loadCinemasFromFile() {
+    std::ifstream in("cinemas.txt");
+    if (!in.is_open()) return;
+
+    std::string line;
+    while (std::getline(in, line)) {
+        if (line.empty()) continue;
+
+        Cinema cinema;
+        cinema.city = line;
+
+        // Read seat count
+        if (!std::getline(in, line) || !isNumber(line)) continue;
+        cinema.seat = std::stoi(line);
+
+        // Read hall count
+        if (!std::getline(in, line) || !isNumber(line)) continue;
+        int hallCount = std::stoi(line);
+
+        for (int i = 0; i < hallCount; ++i) {
+            Hall hall;
+            if (!std::getline(in, hall.name)) break;
+            cinema.halls.push_back(hall);
+        }
+
+        // Read addedByUserID
+        if (!std::getline(in, line) || !isNumber(line)) continue;
+        cinema.addedByUserID = std::stoi(line);
+
+        cinemas.push_back(cinema);
+    }
+
+    in.close();
 }
 
 

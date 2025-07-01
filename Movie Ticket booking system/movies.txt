@@ -1,0 +1,2 @@
+1,r,s,sigma,sigmalese,s,s
+1,r,s,s,s,s,12:12:2000,12:00,14:00

@@ -7,6 +7,7 @@ bool gameOn = true;
 
 int main() {
     
+    loadCinemasFromFile();
     loadMoviesFromFile();
 
     while (!isLoggedIn) {
