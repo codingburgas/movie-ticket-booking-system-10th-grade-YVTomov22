@@ -8,6 +8,12 @@ bool isNumber(const std::string& s) {
 
 
 void addCinema() {
+
+    if (currentUser.role != "admin") {
+        std::cout << "Permission Denied: Only admins can add cinemas.\n";
+        return;
+    }
+
     Cinema newCinema;
     std::cin.ignore(); // clear buffer
 
@@ -46,6 +52,12 @@ void addCinema() {
 
 // Adds a movie to a selected cinema and hall
 void addMovie() {
+
+    if (currentUser.role != "admin") {
+        std::cout << "Permission Denied: Only admins can add movies.\n";
+        return;
+    }
+
     if (cinemas.empty()) {
         std::cout << "No cinemas available.\n";
         return;

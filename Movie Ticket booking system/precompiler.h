@@ -4,6 +4,7 @@
 #include "mainMenu.h"
 #include "../staticLib/itemsCinema.h"
 #include "userUtilities.h"
+#include "seatingUtilities.h"
 
 #include <iostream>
 #include <iomanip>

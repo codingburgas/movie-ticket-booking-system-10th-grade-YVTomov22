@@ -1,2 +1,2 @@
-1,r,s,sigma,sigmalese,s,s
-1,r,s,s,s,s,12:12:2000,12:00,14:00
+1,burg,so,sigm,sigmanese,sigm,2020,13:00,15:00
+1,burg,si,si,2,2,2,2,2

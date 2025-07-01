@@ -4,33 +4,42 @@
 #include <vector>
 #include <string>
 
-struct User {
+class User {
+public:
     int id;
     std::string username;
     std::string password;
-    std::string role; // "admin" or "user"
+    std::string role;
 };
-
 
 extern User currentUser;
 extern bool isLoggedIn;
 
-// Movie structure
+class Seat {
+public:
+    int row;
+    int number;
+    bool isBooked;
+
+    Seat(int r, int num) : row(r), number(num), isBooked(false) {}
+};
+
 class Show {
 public:
     std::string time;
     std::string hallName;
+    std::vector<Seat> seats;
 };
 
-struct Movie {
+class Movie {
+public:
     std::string title;
     std::string language;
     std::string genre;
     std::string releaseDate;
     std::vector<Show> shows;
-    int addedByUserID; // New field
+    int addedByUserID;
 };
-
 
 class Hall {
 public:

@@ -27,7 +27,7 @@ void showMenu() {
         searchMovies();
         break;
     case 4:
-        //seatSelector();
+        seatSelector();
     case 5:
         system("cls");
         addMovie();
@@ -42,6 +42,8 @@ void showMenu() {
         break;
     default:
         std::cout << "Invalid choice!\n";
+        std::cin.clear();
+        std::cin.ignore(10000, '\n');
         break;
     }
 }
