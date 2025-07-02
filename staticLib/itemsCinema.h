@@ -37,6 +37,7 @@ public:
     std::string language;
     std::string genre;
     std::string releaseDate;
+    double price; // Price is part of the movie!
     std::vector<Show> shows;
     int addedByUserID;
 };

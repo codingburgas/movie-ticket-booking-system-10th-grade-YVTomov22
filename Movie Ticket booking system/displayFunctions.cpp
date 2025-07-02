@@ -1,21 +1,19 @@
 #include "precompiler.h"
 
+// Helper function to check if a string is a number
 bool isNumber(const std::string& s) {
     if (s.empty()) return false;
     return std::all_of(s.begin(), s.end(), ::isdigit);
 }
 
 
-
 void addCinema() {
-
     if (currentUser.role != "admin") {
         std::cout << "Permission Denied: Only admins can add cinemas.\n";
         return;
     }
-
     Cinema newCinema;
-    std::cin.ignore(); // clear buffer
+    std::cin.ignore();
 
     std::cout << "Enter city name: ";
     std::getline(std::cin, newCinema.city);
@@ -23,7 +21,8 @@ void addCinema() {
     std::cout << "Enter number of seats (1–100): ";
     std::cin >> newCinema.seat;
     if (std::cin.fail() || newCinema.seat <= 0 || newCinema.seat > 100) {
-        std::cin.clear(); std::cin.ignore(1000, '\n');
+        std::cin.clear();
+        std::cin.ignore(1000, '\n');
         std::cout << "Invalid seat input.\n";
         return;
     }
@@ -43,21 +42,15 @@ void addCinema() {
     newCinema.addedByUserID = currentUser.id;
     cinemas.push_back(newCinema);
 
-    saveCinemasToFile(); // Save after adding
-
+    saveCinemasToFile();
     std::cout << "Cinema added successfully!\n";
 }
 
-
-
-// Adds a movie to a selected cinema and hall
 void addMovie() {
-
     if (currentUser.role != "admin") {
         std::cout << "Permission Denied: Only admins can add movies.\n";
         return;
     }
-
     if (cinemas.empty()) {
         std::cout << "No cinemas available.\n";
         return;
@@ -74,14 +67,12 @@ void addMovie() {
         std::cout << "Invalid cinema selection.\n";
         return;
     }
-
     Cinema& selectedCinema = cinemas[cinemaIndex - 1];
 
     if (selectedCinema.halls.empty()) {
         std::cout << "No halls available in this cinema.\n";
         return;
     }
-
     std::cout << "\nSelect a Hall:\n";
     for (size_t i = 0; i < selectedCinema.halls.size(); ++i) {
         std::cout << i + 1 << ". " << selectedCinema.halls[i].name << "\n";
@@ -93,7 +84,6 @@ void addMovie() {
         std::cout << "Invalid hall selection.\n";
         return;
     }
-
     Hall& selectedHall = selectedCinema.halls[hallIndex - 1];
 
     Movie newMovie;
@@ -107,6 +97,9 @@ void addMovie() {
     std::cout << "Enter release date: ";
     std::getline(std::cin, newMovie.releaseDate);
 
+    std::cout << "Enter ticket price for this movie: ";
+    std::cin >> newMovie.price;
+
     int showCount;
     std::cout << "How many showtimes? ";
     std::cin >> showCount;
@@ -114,7 +107,7 @@ void addMovie() {
 
     for (int i = 0; i < showCount; ++i) {
         Show show;
-        std::cout << "Enter time for show " << i + 1 << ": ";
+        std::cout << "Enter time for show " << i + 1 << " (e.g., 18:30): ";
         std::getline(std::cin, show.time);
         show.hallName = selectedHall.name;
         newMovie.shows.push_back(show);
@@ -131,50 +124,94 @@ void addMovie() {
             << newMovie.title << ','
             << newMovie.language << ','
             << newMovie.genre << ','
-            << newMovie.releaseDate;
+            << newMovie.releaseDate << ','
+            << newMovie.price;
 
         for (const auto& show : newMovie.shows) {
             file << ',' << show.time;
         }
-
         file << '\n';
         file.close();
     }
+    std::cout << "Movie added successfully!\n";
+}
 
-    std::cout << "Movie added successfully by user ID " << currentUser.id << "!\n";
+void loadMoviesFromFile() {
+    std::ifstream file("movies.txt");
+    std::string line;
+    while (std::getline(file, line)) {
+        std::istringstream iss(line);
+        std::string userIdStr, city, hallName, title, language, genre, releaseDate, priceStr, showTime;
+
+        std::getline(iss, userIdStr, ',');
+        std::getline(iss, city, ',');
+        std::getline(iss, hallName, ',');
+        std::getline(iss, title, ',');
+        std::getline(iss, language, ',');
+        std::getline(iss, genre, ',');
+        std::getline(iss, releaseDate, ',');
+        std::getline(iss, priceStr, ',');
+
+        Movie movie;
+        movie.addedByUserID = std::stoi(userIdStr);
+        movie.title = title;
+        movie.language = language;
+        movie.genre = genre;
+        movie.releaseDate = releaseDate;
+        if (!priceStr.empty()) {
+            try {
+                movie.price = std::stod(priceStr);
+            }
+            catch (const std::invalid_argument& e) {
+                movie.price = 10.0; // Default price if conversion fails
+            }
+        }
+        else {
+            movie.price = 10.0;
+        }
+
+        while (std::getline(iss, showTime, ',')) {
+            Show show;
+            show.time = showTime;
+            show.hallName = hallName;
+            movie.shows.push_back(show);
+        }
+
+        for (auto& cinema : cinemas) {
+            if (cinema.city == city) {
+                for (auto& hall : cinema.halls) {
+                    if (hall.name == hallName) {
+                        hall.movies.push_back(movie);
+                    }
+                }
+            }
+        }
+    }
 }
 
 
 
-// Lists all cinemas and their halls
-// Lists all cinemas and their halls
+// These functions are unchanged but are here for completeness
 void listCinemasAndHalls() {
     std::ifstream inFile("cinemas.txt");
-    if (!inFile.is_open()) {
+    if (!inFile.is_open() || inFile.peek() == std::ifstream::traits_type::eof()) {
         std::cout << "\nYou haven't added any cinemas yet.\n";
         return;
     }
 
     std::string line;
-    bool found = false;
     int index = 1;
-
     while (std::getline(inFile, line)) {
         if (line.empty()) continue;
-        found = true;
 
-        Cinema cinema;
-        cinema.city = line;
+        std::cout << "\nCinema " << index++ << ":\n";
+        std::cout << "  City: " << line << "\n";
 
         std::getline(inFile, line);
-        cinema.seat = std::stoi(line);
+        std::cout << "  Seats: " << line << "\n";
 
         std::getline(inFile, line);
         int hallCount = std::stoi(line);
-
-        std::cout << "\nCinema " << index++ << ":\n";
-        std::cout << "  City: " << cinema.city << "\n";
-        std::cout << "  Seats: " << cinema.seat << "\n";
 
         if (hallCount > 0) {
             std::cout << "  Halls:\n";
@@ -186,33 +223,24 @@ void listCinemasAndHalls() {
         else {
             std::cout << "  No halls added to this cinema.\n";
         }
-
-        // Read the user ID line to advance the file pointer
         std::getline(inFile, line);
-    }
-
-    if (!found) {
-        std::cout << "\nYou haven't added any cinemas yet.\n";
     }
     inFile.close();
 }
 
-
-
-
-// Lists all showtimes for a given movie title
 void listShowtimes() {
     std::string movieTitle;
     std::cin.ignore();
     std::cout << "Enter movie title: ";
     std::getline(std::cin, movieTitle);
 
+    bool found = false;
     for (auto& cinema : cinemas) {
         for (auto& hall : cinema.halls) {
             for (auto& movie : hall.movies) {
                 if (movie.title == movieTitle) {
-                    std::cout << "In cinema: " << cinema.city
-                        << ", hall: " << hall.name << "\n";
+                    found = true;
+                    std::cout << "In Cinema: " << cinema.city << ", Hall: " << hall.name << "\n";
                     for (auto& show : movie.shows) {
                         std::cout << "  Time: " << show.time << "\n";
                     }
@@ -220,32 +248,38 @@ void listShowtimes() {
             }
         }
     }
+    if (!found) {
+        std::cout << "No showtimes found for '" << movieTitle << "'.\n";
+    }
 }
 
-// Searches for movies by title, language, genre, or release year
 void searchMovies() {
     std::string query;
     std::cin.ignore();
-    std::cout << "Enter search keyword (title, language, genre, or year): ";
+    std::cout << "Enter search keyword (title, language, genre): ";
     std::getline(std::cin, query);
 
-    int queryYear = -1;
-
-
+    bool found = false;
     for (auto& cinema : cinemas) {
         for (auto& hall : cinema.halls) {
             for (auto& movie : hall.movies) {
-                if (movie.title == query || movie.language == query ||
-                    movie.genre == query) {
+                if (movie.title.find(query) != std::string::npos ||
+                    movie.language.find(query) != std::string::npos ||
+                    movie.genre.find(query) != std::string::npos) {
+                    found = true;
                     std::cout << "Movie: " << movie.title
                         << " | " << movie.language
                         << " | " << movie.genre
                         << " | " << movie.releaseDate
+                        << " | Price: $" << std::fixed << std::setprecision(2) << movie.price
                         << " | Cinema: " << cinema.city
                         << " | Hall: " << hall.name << "\n";
                 }
             }
         }
+    }
+    if (!found) {
+        std::cout << "No movies found matching your query.\n";
     }
 }
 
@@ -266,6 +300,7 @@ void saveCinemasToFile() {
 void loadCinemasFromFile() {
     std::ifstream in("cinemas.txt");
     if (!in.is_open()) return;
+    cinemas.clear();
 
     std::string line;
     while (std::getline(in, line)) {
@@ -274,11 +309,9 @@ void loadCinemasFromFile() {
         Cinema cinema;
         cinema.city = line;
 
-        // Read seat count
         if (!std::getline(in, line) || !isNumber(line)) continue;
         cinema.seat = std::stoi(line);
 
-        // Read hall count
         if (!std::getline(in, line) || !isNumber(line)) continue;
         int hallCount = std::stoi(line);
 
@@ -288,57 +321,10 @@ void loadCinemasFromFile() {
             cinema.halls.push_back(hall);
         }
 
-        // Read addedByUserID
         if (!std::getline(in, line) || !isNumber(line)) continue;
         cinema.addedByUserID = std::stoi(line);
 
         cinemas.push_back(cinema);
     }
-
     in.close();
-}
-
-
-
-void loadMoviesFromFile() {
-    std::ifstream file("movies.txt");
-    std::string line;
-
-    while (std::getline(file, line)) {
-        std::istringstream iss(line);
-        std::string userIdStr, city, hallName, title, language, genre, releaseDate, showTime;
-
-        std::getline(iss, userIdStr, ',');
-        std::getline(iss, city, ',');
-        std::getline(iss, hallName, ',');
-        std::getline(iss, title, ',');
-        std::getline(iss, language, ',');
-        std::getline(iss, genre, ',');
-        std::getline(iss, releaseDate, ',');
-
-        Movie movie;
-        movie.addedByUserID = std::stoi(userIdStr);
-        movie.title = title;
-        movie.language = language;
-        movie.genre = genre;
-        movie.releaseDate = releaseDate;
-
-        while (std::getline(iss, showTime, ',')) {
-            Show show;
-            show.time = showTime;
-            show.hallName = hallName;
-            movie.shows.push_back(show);
-        }
-
-        // Locate matching cinema and hall
-        for (auto& cinema : cinemas) {
-            if (cinema.city == city) {
-                for (auto& hall : cinema.halls) {
-                    if (hall.name == hallName) {
-                        hall.movies.push_back(movie);
-                    }
-                }
-            }
-        }
-    }
 }

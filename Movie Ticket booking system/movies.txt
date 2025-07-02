@@ -1,2 +1,6 @@
 1,burg,so,sigm,sigmanese,sigm,2020,13:00,15:00
 1,burg,si,si,2,2,2,2,2
+1,burg,si,s,si,si,2020,14:00
+1,burg,so,si,s,s,10:00,12:00,16:00
+1,burg,si,s,s,s,2020,12:00
+1,burg,so,s,1,1,1999,10,17:00,12:00

@@ -1,15 +1,10 @@
 ﻿#include "precompiler.h"
 
 void displaySeatingChart(Show& show, int totalSeats) {
-    // This part that initializes seats remains the same
     if (show.seats.empty()) {
         int seatsPerRow = 10;
         for (int i = 0; i < totalSeats; ++i) {
             show.seats.emplace_back(i / seatsPerRow + 1, i % seatsPerRow + 1);
-        }
-        srand(time(0));
-        for (int i = 0; i < totalSeats / 4; ++i) {
-            show.seats[rand() % totalSeats].isBooked = true;
         }
     }
 
@@ -19,26 +14,21 @@ void displaySeatingChart(Show& show, int totalSeats) {
     int seatsPerRow = 10;
     for (size_t i = 0; i < show.seats.size(); ++i) {
         if (i % seatsPerRow == 0) {
-            // Print row number at the beginning of each row
             if (i != 0) std::cout << "\n";
             std::cout << "Row " << std::setw(2) << show.seats[i].row << ": ";
         }
-
         int seatNum = show.seats[i].number;
-
-        // Print the seat number with appropriate color
         if (show.seats[i].isBooked) {
-            // Red for booked seats
             std::cout << "\033[31m" << std::setw(2) << seatNum << " \033[0m";
         }
         else {
-            // Green for available seats
             std::cout << "\033[32m" << std::setw(2) << seatNum << " \033[0m";
         }
     }
-    // Update the legend
     std::cout << "\n\nLegend: Green = Available | Red = Booked\n";
 }
+
+// All functions below are the final, corrected versions.
 
 // Main function for seat selection process
 void seatSelector() {
@@ -47,7 +37,6 @@ void seatSelector() {
         return;
     }
 
-    // 1. Select Cinema
     std::cout << "\nSelect a Cinema:\n";
     for (size_t i = 0; i < cinemas.size(); ++i) {
         std::cout << i + 1 << ". " << cinemas[i].city << "\n";
@@ -63,7 +52,6 @@ void seatSelector() {
     }
     Cinema& selectedCinema = cinemas[cinemaIndex - 1];
 
-    // 2. Select Hall
     if (selectedCinema.halls.empty()) {
         std::cout << "No halls available in this cinema.\n";
         return;
@@ -83,7 +71,6 @@ void seatSelector() {
     }
     Hall& selectedHall = selectedCinema.halls[hallIndex - 1];
 
-    // 3. Select Movie
     if (selectedHall.movies.empty()) {
         std::cout << "No movies available in this hall.\n";
         return;
@@ -103,7 +90,6 @@ void seatSelector() {
     }
     Movie& selectedMovie = selectedHall.movies[movieIndex - 1];
 
-    // 4. Select Show
     if (selectedMovie.shows.empty()) {
         std::cout << "No showtimes available for this movie.\n";
         return;
@@ -123,14 +109,15 @@ void seatSelector() {
     }
     Show& selectedShow = selectedMovie.shows[showIndex - 1];
 
-    // 5. Display the seating chart for the first time
     system("cls");
     displaySeatingChart(selectedShow, selectedCinema.seat);
 
-    // 6. Interactive booking loop
+    std::vector<int> selectedSeatsThisSession;
+    double totalPrice = 0.0;
+
     while (true) {
         std::cout << "\nEnter row and seat number to book (e.g., 3 5).\n";
-        std::cout << "Enter 0 0 to finish selection: ";
+        std::cout << "Enter 0 0 to finish selection and proceed to payment: ";
         int row, seatNum;
         std::cin >> row >> seatNum;
 
@@ -138,49 +125,66 @@ void seatSelector() {
             std::cout << "Invalid input. Please enter numbers only.\n";
             std::cin.clear();
             std::cin.ignore(10000, '\n');
-            continue; // Ask for input again
+            continue;
         }
 
         if (row == 0 || seatNum == 0) {
-            std::cout << "Finished selecting seats.\n";
-            break; // Exit the booking loop
+            break;
         }
 
         int seatsPerRow = 10;
-        // Calculate total rows, rounding up
         int totalRows = (selectedCinema.seat + seatsPerRow - 1) / seatsPerRow;
-
-        // Validate that the chosen seat exists
-        if (row < 1 || row > totalRows || seatNum < 1 || seatNum > seatsPerRow) {
-            std::cout << "Invalid seat number. Please try again.\n";
-            continue;
-        }
-
-        // Convert 2D coordinates to 1D vector index
         int seatIndex = (row - 1) * seatsPerRow + (seatNum - 1);
 
-        if (seatIndex >= selectedCinema.seat) {
+        if (row < 1 || row > totalRows || seatNum < 1 || seatNum > seatsPerRow || seatIndex >= selectedCinema.seat) {
             std::cout << "Invalid seat number. Please try again.\n";
             continue;
         }
 
-        // Check if the seat is already booked
         if (selectedShow.seats[seatIndex].isBooked) {
             std::cout << "Sorry, that seat is already booked. Please choose another.\n";
-        } else {
+        }
+        else {
             selectedShow.seats[seatIndex].isBooked = true;
-            std::cout << "Seat (" << row << ", " << seatNum << ") booked successfully!\n";
-            
-            // Short pause to see the message
-            std::cout << "Press Enter to continue...";
-            std::cin.ignore(10000, '\n'); // Clear previous input
-            std::cin.get(); // Wait for Enter key
+            selectedSeatsThisSession.push_back(seatIndex);
 
-            // Redisplay the updated chart
+            totalPrice += selectedMovie.price;
+
+            std::cout << "Seat (" << row << ", " << seatNum << ") added! Current Total: $" << std::fixed << std::setprecision(2) << totalPrice << "\n";
+
+            std::cout << "Press Enter to continue...";
+            std::cin.ignore(10000, '\n');
+            std::cin.get();
+
             system("cls");
             displaySeatingChart(selectedShow, selectedCinema.seat);
         }
     }
-    // After the loop finishes, clear the final newline before returning to the menu
+
+    if (totalPrice > 0) {
+        std::cout << "\nYour total is $" << std::fixed << std::setprecision(2) << totalPrice << ".\n";
+        std::cout << "1. Confirm and Pay\n";
+        std::cout << "2. Cancel Booking\n";
+        std::cout << "Choose an option: ";
+
+        int paymentChoice;
+        std::cin >> paymentChoice;
+
+        if (paymentChoice == 1) {
+            std::cout << "\nPayment successful! Thank you for your booking! Enjoy the show!\n";
+        }
+        else {
+            std::cout << "\nBooking canceled. Your selected seats have been released.\n";
+            for (int index : selectedSeatsThisSession) {
+                selectedShow.seats[index].isBooked = false;
+            }
+        }
+    }
+    else {
+        std::cout << "\nNo seats were selected. Returning to main menu.\n";
+    }
+
     std::cin.ignore(10000, '\n');
+    std::cout << "Press Enter to return to the main menu...";
+    std::cin.get();
 }

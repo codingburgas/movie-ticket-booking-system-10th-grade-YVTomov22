@@ -6,7 +6,7 @@ void showMenu() {
     std::cout << "1. List All Cinemas and Halls\n";
     std::cout << "2. View All Showtimes of a Movie\n";
     std::cout << "3. Search Movie\n";
-    std::cout << "4. Select Seat\n";
+    std::cout << "4. Book ticket\n";
     std::cout << "5. Add Movie\n";
     std::cout << "6. Add Cinema\n";
     std::cout << "0. Exit\n";
