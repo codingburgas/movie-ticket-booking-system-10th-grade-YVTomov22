@@ -8,7 +8,6 @@ void showMenu() {
     std::cout << "3. Search Movie\n";
     std::cout << "4. Select Seat\n";
 
-    // Only show these options if the user is an admin
     if (currentUser.role == "admin") {
         std::cout << "---------------------------------\n";
         std::cout << "Admin Panel:\n";
@@ -17,6 +16,7 @@ void showMenu() {
         std::cout << "7. Delete Movie\n";
         std::cout << "8. Delete Cinema\n";
         std::cout << "9. View Cinema Reservations\n";
+        std::cout << "10. Update Movie Details\n";
         std::cout << "---------------------------------\n";
     }
 
@@ -88,6 +88,15 @@ void showMenu() {
         if (currentUser.role == "admin") {
             system("cls");
             viewCinemaReservations();
+        }
+        else {
+            std::cout << "Invalid choice!\n";
+        }
+        break;
+    case 10:
+        if (currentUser.role == "admin") {
+            system("cls");
+            updateMovie();
         }
         else {
             std::cout << "Invalid choice!\n";

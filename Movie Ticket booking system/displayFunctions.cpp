@@ -515,3 +515,101 @@ void viewCinemaReservations() {
     std::cin.ignore(10000, '\n');
     std::cin.get();
 }
+
+void updateMovie() {
+    if (currentUser.role != "admin") {
+        std::cout << "Permission Denied.\n";
+        return;
+    }
+
+    if (cinemas.empty()) {
+        std::cout << "No cinemas available.\n";
+        return;
+    }
+    std::cout << "\nSelect a Cinema:\n";
+    for (size_t i = 0; i < cinemas.size(); ++i) { std::cout << i + 1 << ". " << cinemas[i].city << "\n"; }
+    int cinemaIndex;
+    std::cin >> cinemaIndex;
+    if (std::cin.fail() || cinemaIndex < 1 || cinemaIndex > cinemas.size()) { return; }
+    Cinema& selectedCinema = cinemas[cinemaIndex - 1];
+
+    if (selectedCinema.halls.empty()) { return; }
+    std::cout << "\nSelect a Hall:\n";
+    for (size_t i = 0; i < selectedCinema.halls.size(); ++i) { std::cout << i + 1 << ". " << selectedCinema.halls[i].name << "\n"; }
+    int hallIndex;
+    std::cin >> hallIndex;
+    if (std::cin.fail() || hallIndex < 1 || hallIndex > selectedCinema.halls.size()) { return; }
+    Hall& selectedHall = selectedCinema.halls[hallIndex - 1];
+
+    if (selectedHall.movies.empty()) {
+        std::cout << "No movies in this hall to update.\n";
+        return;
+    }
+    std::cout << "\nSelect a Movie to Update:\n";
+    for (size_t i = 0; i < selectedHall.movies.size(); ++i) { std::cout << i + 1 << ". " << selectedHall.movies[i].title << "\n"; }
+    int movieIndex;
+    std::cin >> movieIndex;
+    if (std::cin.fail() || movieIndex < 1 || movieIndex > selectedHall.movies.size()) { return; }
+
+    Movie& movieToUpdate = selectedHall.movies[movieIndex - 1];
+
+    bool isDoneUpdating = false;
+    while (!isDoneUpdating) {
+        system("cls");
+        std::cout << "Updating Movie: " << movieToUpdate.title << "\n";
+        std::cout << "Current Price: $" << std::fixed << std::setprecision(2) << movieToUpdate.price << "\n\n";
+
+        std::cout << "What do you want to change?\n";
+        std::cout << "1. Title\n";
+        std::cout << "2. Genre\n";
+        std::cout << "3. Release Date\n";
+        std::cout << "4. Price\n";
+        std::cout << "0. Finish Updating\n";
+        std::cout << "Choose an option: ";
+
+        int choice;
+        std::cin >> choice;
+        std::cin.ignore(10000, '\n');
+
+        switch (choice) {
+        case 1: {
+            std::cout << "Enter new title: ";
+            std::getline(std::cin, movieToUpdate.title);
+            std::cout << "Title updated!\n";
+            break;
+        }
+        case 2: {
+            std::cout << "Enter new genre: ";
+            std::getline(std::cin, movieToUpdate.genre);
+            std::cout << "Genre updated!\n";
+            break;
+        }
+        case 3: {
+            std::cout << "Enter new release date: ";
+            std::getline(std::cin, movieToUpdate.releaseDate);
+            std::cout << "Release date updated!\n";
+            break;
+        }
+        case 4: {
+            std::cout << "Enter new price: ";
+            std::cin >> movieToUpdate.price;
+            std::cout << "Price updated!\n";
+            break;
+        }
+        case 0:
+            isDoneUpdating = true;
+            break;
+        default:
+            std::cout << "Invalid choice. Please try again.\n";
+            break;
+        }
+        if (!isDoneUpdating) {
+            std::cout << "Press Enter to continue...";
+            std::cin.get();
+        }
+    }
+
+    saveMoviesToFile();
+    std::cout << "\nAll changes have been saved!\n";
+    std::cout << "Press Enter to return to the main menu...";
+}

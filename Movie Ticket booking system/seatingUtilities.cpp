@@ -2,7 +2,6 @@
 #include "seatingUtilities.h"
 #include "displayFunctions.h"
 
-// The display function is now cleaner! It only displays.
 void displaySeatingChart(Show& show, int totalSeats) {
     std::cout << "\n--- Seating Arrangement ---\n";
     std::cout << "      Screen This Way\n\n";
@@ -24,14 +23,12 @@ void displaySeatingChart(Show& show, int totalSeats) {
     std::cout << "\n\nLegend: Green = Available | Red = Booked\n";
 }
 
-// Main function for seat selection process with SAVING!
 void seatSelector() {
     if (cinemas.empty()) {
         std::cout << "No cinemas available to select seats from.\n";
         return;
     }
 
-    // --- The code to select a Cinema, Hall, Movie, and Show is the same ---
     std::cout << "\nSelect a Cinema:\n";
     for (size_t i = 0; i < cinemas.size(); ++i) {
         std::cout << i + 1 << ". " << cinemas[i].city << "\n";

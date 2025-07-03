@@ -1,1 +1,1 @@
-1,4,y,sigma,sigmanese,s,2020,1,12:00
+1,Burgas,one,Fast,English,Action,2020,5,15:00,18:00
