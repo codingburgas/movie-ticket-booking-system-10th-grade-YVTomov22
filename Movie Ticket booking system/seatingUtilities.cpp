@@ -1,13 +1,9 @@
 ﻿#include "precompiler.h"
+#include "seatingUtilities.h"
+#include "displayFunctions.h"
 
+// The display function is now cleaner! It only displays.
 void displaySeatingChart(Show& show, int totalSeats) {
-    if (show.seats.empty()) {
-        int seatsPerRow = 10;
-        for (int i = 0; i < totalSeats; ++i) {
-            show.seats.emplace_back(i / seatsPerRow + 1, i % seatsPerRow + 1);
-        }
-    }
-
     std::cout << "\n--- Seating Arrangement ---\n";
     std::cout << "      Screen This Way\n\n";
 
@@ -28,15 +24,14 @@ void displaySeatingChart(Show& show, int totalSeats) {
     std::cout << "\n\nLegend: Green = Available | Red = Booked\n";
 }
 
-// All functions below are the final, corrected versions.
-
-// Main function for seat selection process
+// Main function for seat selection process with SAVING!
 void seatSelector() {
     if (cinemas.empty()) {
         std::cout << "No cinemas available to select seats from.\n";
         return;
     }
 
+    // --- The code to select a Cinema, Hall, Movie, and Show is the same ---
     std::cout << "\nSelect a Cinema:\n";
     for (size_t i = 0; i < cinemas.size(); ++i) {
         std::cout << i + 1 << ". " << cinemas[i].city << "\n";
@@ -171,13 +166,15 @@ void seatSelector() {
         std::cin >> paymentChoice;
 
         if (paymentChoice == 1) {
-            std::cout << "\nPayment successful! Thank you for your booking! Enjoy the show!\n";
+            std::cout << "\nPayment successful! Your booking is now saved permanently!\n";
+            saveBookingsToFile();
         }
         else {
             std::cout << "\nBooking canceled. Your selected seats have been released.\n";
             for (int index : selectedSeatsThisSession) {
                 selectedShow.seats[index].isBooked = false;
             }
+            saveBookingsToFile();
         }
     }
     else {
@@ -187,4 +184,84 @@ void seatSelector() {
     std::cin.ignore(10000, '\n');
     std::cout << "Press Enter to return to the main menu...";
     std::cin.get();
+}
+
+void initializeAllSeats() {
+    for (auto& cinema : cinemas) {
+        for (auto& hall : cinema.halls) {
+            for (auto& movie : hall.movies) {
+                for (auto& show : movie.shows) {
+                    if (show.seats.empty()) {
+                        for (int i = 0; i < cinema.seat; ++i) {
+                            show.seats.emplace_back(i / 10 + 1, i % 10 + 1);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+void saveBookingsToFile() {
+    std::ofstream file("bookings.txt");
+    for (const auto& cinema : cinemas) {
+        for (const auto& hall : cinema.halls) {
+            for (const auto& movie : hall.movies) {
+                for (const auto& show : movie.shows) {
+                    for (const auto& seat : show.seats) {
+                        if (seat.isBooked) {
+                            file << cinema.city << "," << hall.name << "," << movie.title << ","
+                                << show.time << "," << seat.row << "," << seat.number << "\n";
+                        }
+                    }
+                }
+            }
+        }
+    }
+    file.close();
+}
+
+void loadBookingsFromFile() {
+    std::ifstream file("bookings.txt");
+    if (!file.is_open()) return;
+
+    std::string line;
+    while (std::getline(file, line)) {
+        std::istringstream iss(line);
+        std::string city, hallName, movieTitle, showTime, rowStr, seatNumStr;
+
+        std::getline(iss, city, ',');
+        std::getline(iss, hallName, ',');
+        std::getline(iss, movieTitle, ',');
+        std::getline(iss, showTime, ',');
+        std::getline(iss, rowStr, ',');
+        std::getline(iss, seatNumStr, ',');
+
+        int row = std::stoi(rowStr);
+        int seatNum = std::stoi(seatNumStr);
+
+        for (auto& cinema : cinemas) {
+            if (cinema.city == city) {
+                for (auto& hall : cinema.halls) {
+                    if (hall.name == hallName) {
+                        for (auto& movie : hall.movies) {
+                            if (movie.title == movieTitle) {
+                                for (auto& show : movie.shows) {
+                                    if (show.time == showTime) {
+                                        for (auto& seat : show.seats) {
+                                            if (seat.row == row && seat.number == seatNum) {
+                                                seat.isBooked = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    file.close();
 }

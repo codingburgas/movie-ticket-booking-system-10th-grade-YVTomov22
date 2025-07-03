@@ -9,6 +9,8 @@ int main() {
     
     loadCinemasFromFile();
     loadMoviesFromFile();
+    initializeAllSeats();
+    loadBookingsFromFile();
 
     while (!isLoggedIn) {
         showAuthMenu();

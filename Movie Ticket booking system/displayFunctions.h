@@ -11,3 +11,4 @@ void saveCinemasToFile();
 void deleteMovie();
 void saveMoviesToFile();
 void deleteCinema();
+void viewCinemaReservations();

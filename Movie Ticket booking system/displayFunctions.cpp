@@ -1,6 +1,5 @@
 #include "precompiler.h"
 
-// Helper function to check if a string is a number
 bool isNumber(const std::string& s) {
     if (s.empty()) return false;
     return std::all_of(s.begin(), s.end(), ::isdigit);
@@ -163,7 +162,7 @@ void loadMoviesFromFile() {
                 movie.price = std::stod(priceStr);
             }
             catch (const std::invalid_argument& e) {
-                movie.price = 10.0; // Default price if conversion fails
+                movie.price = 10.0;
             }
         }
         else {
@@ -189,9 +188,6 @@ void loadMoviesFromFile() {
     }
 }
 
-
-
-// These functions are unchanged but are here for completeness
 void listCinemasAndHalls() {
     std::ifstream inFile("cinemas.txt");
     if (!inFile.is_open() || inFile.peek() == std::ifstream::traits_type::eof()) {
@@ -329,9 +325,8 @@ void loadCinemasFromFile() {
     in.close();
 }
 
-// Add this new function to save all movies to the file
 void saveMoviesToFile() {
-    std::ofstream file("movies.txt"); // This overwrites the old file
+    std::ofstream file("movies.txt");
     if (!file.is_open()) {
         std::cout << "Error: Could not open movies.txt for saving.\n";
         return;
@@ -359,7 +354,6 @@ void saveMoviesToFile() {
     file.close();
 }
 
-// The new function to delete a cinema
 void deleteCinema() {
     if (currentUser.role != "admin") {
         std::cout << "Permission Denied.\n";
@@ -391,24 +385,20 @@ void deleteCinema() {
         return;
     }
 
-    // Erase from the vector
     cinemas.erase(cinemas.begin() + (choice - 1));
 
-    // Save both files to reflect the change
     saveCinemasToFile();
-    saveMoviesToFile(); // This removes movies from the deleted cinema
+    saveMoviesToFile();
 
     std::cout << "Cinema and all its movies have been deleted successfully!\n";
 }
 
-// The new function to delete a movie
 void deleteMovie() {
     if (currentUser.role != "admin") {
         std::cout << "Permission Denied.\n";
         return;
     }
 
-    // --- Navigation to select the movie ---
     if (cinemas.empty()) {
         std::cout << "No cinemas available.\n";
         return;
@@ -419,17 +409,17 @@ void deleteMovie() {
     }
     int cinemaIndex;
     std::cin >> cinemaIndex;
-    if (std::cin.fail() || cinemaIndex < 1 || cinemaIndex > cinemas.size()) { /*...*/ return; }
+    if (std::cin.fail() || cinemaIndex < 1 || cinemaIndex > cinemas.size()) {return;}
     Cinema& selectedCinema = cinemas[cinemaIndex - 1];
 
-    if (selectedCinema.halls.empty()) { /*...*/ return; }
+    if (selectedCinema.halls.empty()) {return;}
     std::cout << "\nSelect a Hall:\n";
     for (size_t i = 0; i < selectedCinema.halls.size(); ++i) {
         std::cout << i + 1 << ". " << selectedCinema.halls[i].name << "\n";
     }
     int hallIndex;
     std::cin >> hallIndex;
-    if (std::cin.fail() || hallIndex < 1 || hallIndex > selectedCinema.halls.size()) { /*...*/ return; }
+    if (std::cin.fail() || hallIndex < 1 || hallIndex > selectedCinema.halls.size()) {return;}
     Hall& selectedHall = selectedCinema.halls[hallIndex - 1];
 
     if (selectedHall.movies.empty()) {
@@ -454,11 +444,74 @@ void deleteMovie() {
         return;
     }
 
-    // --- Deletion Logic ---
     selectedHall.movies.erase(selectedHall.movies.begin() + (movieIndex - 1));
 
-    // Save the movies file to make the deletion permanent
     saveMoviesToFile();
 
     std::cout << "Movie deleted successfully!\n";
+}
+
+void viewCinemaReservations() {
+    if (currentUser.role != "admin") {
+        std::cout << "Permission Denied. This is an admin-only feature.\n";
+        return;
+    }
+    if (cinemas.empty()) {
+        std::cout << "There are no cinemas to view.\n";
+        return;
+    }
+
+    std::cout << "\nSelect a Cinema to view its reservation status:\n";
+    for (size_t i = 0; i < cinemas.size(); ++i) {
+        std::cout << i + 1 << ". " << cinemas[i].city << "\n";
+    }
+
+    std::cout << "Enter 0 to cancel.\nChoose an option: ";
+    int choice;
+    std::cin >> choice;
+
+    if (choice == 0) {
+        std::cout << "Action canceled.\n";
+        std::cin.ignore(10000, '\n');
+        std::cin.get();
+        return;
+    }
+
+    if (std::cin.fail() || choice < 1 || choice > cinemas.size()) {
+        std::cout << "Invalid selection.\n";
+        std::cin.clear();
+        std::cin.ignore(10000, '\n');
+        return;
+    }
+
+    Cinema& selectedCinema = cinemas[choice - 1];
+    system("cls");
+    std::cout << "--- Visual Reservation Status for " << selectedCinema.city << " ---\n\n";
+
+    bool foundAnyShows = false;
+    for (auto& hall : selectedCinema.halls) {
+        if (hall.movies.empty()) continue;
+
+        for (auto& movie : hall.movies) {
+            for (auto& show : movie.shows) {
+                foundAnyShows = true;
+
+
+                std::cout << "========================================================\n";
+                std::cout << "Hall: " << hall.name << " | Movie: " << movie.title << " | Time: " << show.time << "\n";
+
+                displaySeatingChart(show, selectedCinema.seat);
+
+                std::cout << "\n";
+            }
+        }
+    }
+
+    if (!foundAnyShows) {
+        std::cout << "No shows have been added to this cinema yet.\n";
+    }
+
+    std::cout << "Press Enter to return to the main menu...";
+    std::cin.ignore(10000, '\n');
+    std::cin.get();
 }

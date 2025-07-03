@@ -16,6 +16,7 @@ void showMenu() {
         std::cout << "6. Add Cinema\n";
         std::cout << "7. Delete Movie\n";
         std::cout << "8. Delete Cinema\n";
+        std::cout << "9. View Cinema Reservations\n";
         std::cout << "---------------------------------\n";
     }
 
@@ -83,10 +84,19 @@ void showMenu() {
             std::cout << "Invalid choice!\n";
         }
         break;
+    case 9:
+        if (currentUser.role == "admin") {
+            system("cls");
+            viewCinemaReservations();
+        }
+        else {
+            std::cout << "Invalid choice!\n";
+        }
+        break;
     case 0:
         gameOn = false;
         system("cls");
-        std::cout << "Exiting system.\n";
+        std::cout << "Exiting system. Goodbye!\n";
         break;
     default:
         std::cout << "Invalid choice! Please try again.\n";
