@@ -328,3 +328,137 @@ void loadCinemasFromFile() {
     }
     in.close();
 }
+
+// Add this new function to save all movies to the file
+void saveMoviesToFile() {
+    std::ofstream file("movies.txt"); // This overwrites the old file
+    if (!file.is_open()) {
+        std::cout << "Error: Could not open movies.txt for saving.\n";
+        return;
+    }
+
+    for (const auto& cinema : cinemas) {
+        for (const auto& hall : cinema.halls) {
+            for (const auto& movie : hall.movies) {
+                file << movie.addedByUserID << ','
+                    << cinema.city << ','
+                    << hall.name << ','
+                    << movie.title << ','
+                    << movie.language << ','
+                    << movie.genre << ','
+                    << movie.releaseDate << ','
+                    << movie.price;
+
+                for (const auto& show : movie.shows) {
+                    file << ',' << show.time;
+                }
+                file << '\n';
+            }
+        }
+    }
+    file.close();
+}
+
+// The new function to delete a cinema
+void deleteCinema() {
+    if (currentUser.role != "admin") {
+        std::cout << "Permission Denied.\n";
+        return;
+    }
+    if (cinemas.empty()) {
+        std::cout << "There are no cinemas to delete.\n";
+        return;
+    }
+
+    std::cout << "\nSelect a Cinema to DELETE:\n";
+    for (size_t i = 0; i < cinemas.size(); ++i) {
+        std::cout << i + 1 << ". " << cinemas[i].city << "\n";
+    }
+
+    std::cout << "Enter 0 to cancel.\nChoose an option: ";
+    int choice;
+    std::cin >> choice;
+
+    if (choice == 0) {
+        std::cout << "Deletion canceled.\n";
+        return;
+    }
+
+    if (std::cin.fail() || choice < 1 || choice > cinemas.size()) {
+        std::cout << "Invalid selection.\n";
+        std::cin.clear();
+        std::cin.ignore(10000, '\n');
+        return;
+    }
+
+    // Erase from the vector
+    cinemas.erase(cinemas.begin() + (choice - 1));
+
+    // Save both files to reflect the change
+    saveCinemasToFile();
+    saveMoviesToFile(); // This removes movies from the deleted cinema
+
+    std::cout << "Cinema and all its movies have been deleted successfully!\n";
+}
+
+// The new function to delete a movie
+void deleteMovie() {
+    if (currentUser.role != "admin") {
+        std::cout << "Permission Denied.\n";
+        return;
+    }
+
+    // --- Navigation to select the movie ---
+    if (cinemas.empty()) {
+        std::cout << "No cinemas available.\n";
+        return;
+    }
+    std::cout << "\nSelect a Cinema:\n";
+    for (size_t i = 0; i < cinemas.size(); ++i) {
+        std::cout << i + 1 << ". " << cinemas[i].city << "\n";
+    }
+    int cinemaIndex;
+    std::cin >> cinemaIndex;
+    if (std::cin.fail() || cinemaIndex < 1 || cinemaIndex > cinemas.size()) { /*...*/ return; }
+    Cinema& selectedCinema = cinemas[cinemaIndex - 1];
+
+    if (selectedCinema.halls.empty()) { /*...*/ return; }
+    std::cout << "\nSelect a Hall:\n";
+    for (size_t i = 0; i < selectedCinema.halls.size(); ++i) {
+        std::cout << i + 1 << ". " << selectedCinema.halls[i].name << "\n";
+    }
+    int hallIndex;
+    std::cin >> hallIndex;
+    if (std::cin.fail() || hallIndex < 1 || hallIndex > selectedCinema.halls.size()) { /*...*/ return; }
+    Hall& selectedHall = selectedCinema.halls[hallIndex - 1];
+
+    if (selectedHall.movies.empty()) {
+        std::cout << "No movies in this hall to delete.\n";
+        return;
+    }
+    std::cout << "\nSelect a Movie to DELETE:\n";
+    for (size_t i = 0; i < selectedHall.movies.size(); ++i) {
+        std::cout << i + 1 << ". " << selectedHall.movies[i].title << "\n";
+    }
+    std::cout << "Enter 0 to cancel.\nChoose an option: ";
+    int movieIndex;
+    std::cin >> movieIndex;
+
+    if (movieIndex == 0) {
+        std::cout << "Deletion canceled.\n";
+        return;
+    }
+
+    if (std::cin.fail() || movieIndex < 1 || movieIndex > selectedHall.movies.size()) {
+        std::cout << "Invalid selection.\n";
+        return;
+    }
+
+    // --- Deletion Logic ---
+    selectedHall.movies.erase(selectedHall.movies.begin() + (movieIndex - 1));
+
+    // Save the movies file to make the deletion permanent
+    saveMoviesToFile();
+
+    std::cout << "Movie deleted successfully!\n";
+}

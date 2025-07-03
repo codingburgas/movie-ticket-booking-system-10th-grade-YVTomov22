@@ -8,3 +8,6 @@ void addCinema();
 void loadMoviesFromFile();
 void loadCinemasFromFile();
 void saveCinemasToFile();
+void deleteMovie();
+void saveMoviesToFile();
+void deleteCinema();

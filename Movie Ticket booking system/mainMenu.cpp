@@ -6,12 +6,29 @@ void showMenu() {
     std::cout << "1. List All Cinemas and Halls\n";
     std::cout << "2. View All Showtimes of a Movie\n";
     std::cout << "3. Search Movie\n";
-    std::cout << "4. Book ticket\n";
-    std::cout << "5. Add Movie\n";
-    std::cout << "6. Add Cinema\n";
+    std::cout << "4. Select Seat\n";
+
+    // Only show these options if the user is an admin
+    if (currentUser.role == "admin") {
+        std::cout << "---------------------------------\n";
+        std::cout << "Admin Panel:\n";
+        std::cout << "5. Add Movie\n";
+        std::cout << "6. Add Cinema\n";
+        std::cout << "7. Delete Movie\n";
+        std::cout << "8. Delete Cinema\n";
+        std::cout << "---------------------------------\n";
+    }
+
     std::cout << "0. Exit\n";
     std::cout << "Choose an option: ";
     std::cin >> choice;
+
+    if (std::cin.fail()) {
+        std::cout << "Invalid input! Please enter a number.\n";
+        std::cin.clear();
+        std::cin.ignore(10000, '\n');
+        return;
+    }
 
     switch (choice) {
     case 1:
@@ -27,23 +44,52 @@ void showMenu() {
         searchMovies();
         break;
     case 4:
-        seatSelector();
-    case 5:
         system("cls");
-        addMovie();
+        seatSelector();
+        break;
+    case 5:
+        if (currentUser.role == "admin") {
+            system("cls");
+            addMovie();
+        }
+        else {
+            std::cout << "Invalid choice!\n";
+        }
         break;
     case 6:
-        system("cls");
-        addCinema();
+        if (currentUser.role == "admin") {
+            system("cls");
+            addCinema();
+        }
+        else {
+            std::cout << "Invalid choice!\n";
+        }
+        break;
+    case 7:
+        if (currentUser.role == "admin") {
+            system("cls");
+            deleteMovie();
+        }
+        else {
+            std::cout << "Invalid choice!\n";
+        }
+        break;
+    case 8:
+        if (currentUser.role == "admin") {
+            system("cls");
+            deleteCinema();
+        }
+        else {
+            std::cout << "Invalid choice!\n";
+        }
         break;
     case 0:
         gameOn = false;
         system("cls");
+        std::cout << "Exiting system.\n";
         break;
     default:
-        std::cout << "Invalid choice!\n";
-        std::cin.clear();
-        std::cin.ignore(10000, '\n');
+        std::cout << "Invalid choice! Please try again.\n";
         break;
     }
 }
